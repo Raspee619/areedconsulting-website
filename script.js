@@ -7,7 +7,7 @@ function toggleNav(){
 }
 
 // Stripe setup - REPLACE WITH YOUR OWN KEYS
-const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE'); // TODO: Add your Stripe publishable key
+const stripe = Stripepk_test_51T6PXHQ70yqQNnVHPlML7KZePx9aO00soARoGSled4hiwacEBVlzAwIIKkHQHz22b1DXk7CDsZJlooWr2qfrnqzh00GhgfxUt1; // TODO: Add your Stripe publishable key
 
 const serviceNames = {
   'consultation': 'Phone Consultation',
