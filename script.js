@@ -6,8 +6,13 @@ function toggleNav(){
   btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
-// Stripe setup - REPLACE WITH YOUR OWN KEYS
-const stripe = pk_live_51NrQsrE03aVdhmxuTZ7wSBPfidUKYpUBKkl21eX8alr6zN2qFTIfN5x8fAHlSZHMqajbxDwA3nZvor6XMbrNmicA00nzU9CYxI // TODO: Add your Stripe publishable key
+// Stripe setup – publishable key is safe to include in client-side code.
+// To rotate the key, update this value and redeploy.
+const stripe = Stripe('pk_live_51NrQsrE03aVdhmxuTZ7wSBPfidUKYpUBKkl21eX8alr6zN2qFTIfN5x8fAHlSZHMqajbxDwA3nZvor6XMbrNmicA00nzU9CYxI');
+
+// Backend endpoint for creating a Stripe Checkout Session.
+// Change this URL if the server is hosted at a different origin.
+const CHECKOUT_ENDPOINT = '/create-checkout-session';
 
 const serviceNames = {
   'consultation': 'Phone Consultation',
@@ -69,32 +74,50 @@ document.querySelectorAll('.service-item .book-now').forEach(btn => {
 
 // Stripe checkout
 checkoutBtn.addEventListener('click', async () => {
-  // TODO: Create Price IDs in your Stripe Dashboard for each service
-  // Then map them here:
   const priceIds = {
-    'consultation': 'price_1234567890',      // Replace with actual Stripe Price ID
-    'field-verify': 'price_1T7sPsE03aVdhmxuJUYPM09l',      // Replace with actual Stripe Price ID
-    'cad-docs': 'price_1T7sd8E03aVdhmxuJM0CgRD5',          // Replace with actual Stripe Price ID
-    'construction': 'price_1T7seAE03aVdhmxukOIoQhLy',      // Replace with actual Stripe Price ID
-    'permitting': 'price_1T7sLvE03aVdhmxur2s9ivoR'         // Replace with actual Stripe Price ID
+    'consultation': null,                            // Free – handled separately
+    'field-verify': 'price_1T7sPsE03aVdhmxuJUYPM09l',
+    'cad-docs': 'price_1T7sd8E03aVdhmxuJM0CgRD5',
+    'construction': 'price_1T7seAE03aVdhmxukOIoQhLy',
+    'permitting': 'price_1T7sLvE03aVdhmxur2s9ivoR'
   };
 
-  // For now, alert user to complete setup
-  if (priceIds[currentService].includes('123456789')) {
-    alert('Stripe checkout coming soon! Please contact anthony@areedconsulting.com to book this service.');
+  // Free consultation – direct contact instead of payment
+  if (currentService === 'consultation') {
+    alert('To book a free phone consultation, please email anthony@areedconsulting.com or use the contact form.');
     modal.style.display = 'none';
     return;
   }
 
-  const {error} = await stripe.redirectToCheckout({
-    lineItems: [{price: priceIds[currentService], quantity: 1}],
-    mode: 'payment',
-    successUrl: window.location.origin + '/success.html',
-    cancelUrl: window.location.origin + '/services.html',
-  });
+  const priceId = priceIds[currentService];
+  if (!priceId) {
+    alert('Checkout is not yet available for this service. Please contact anthony@areedconsulting.com.');
+    modal.style.display = 'none';
+    return;
+  }
 
-  if (error) {
+  checkoutBtn.disabled = true;
+  checkoutBtn.textContent = 'Loading…';
+
+  try {
+    // Call backend to create a Stripe Checkout Session.
+    // See BACKEND_SETUP.md for the required server endpoint.
+    const response = await fetch(CHECKOUT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priceId })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create checkout session');
+    }
+
+    const { url } = await response.json();
+    window.location.href = url;
+  } catch (error) {
     console.error(error);
-    alert('Checkout failed. Please try again or contact us directly.');
+    alert('Checkout failed. Please try again or contact anthony@areedconsulting.com directly.');
+    checkoutBtn.disabled = false;
+    checkoutBtn.textContent = 'Pay with Stripe';
   }
 });
