@@ -56,6 +56,7 @@ window.onclick = function(event) {
 document.querySelectorAll('.dropdown-menu a[data-service]').forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const service = link.getAttribute('data-service');
     const price = link.getAttribute('data-price');
     openModal(service, price);
