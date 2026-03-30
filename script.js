@@ -8,7 +8,7 @@ function toggleNav(){
 
 // Stripe setup – publishable key is safe to include in client-side code.
 // To rotate the key, update this value and redeploy.
-const stripe = Stripe('pk_live_51NrQsrE03aVdhmxuTZ7wSBPfidUKYpUBKkl21eX8alr6zN2qFTIfN5x8fAHlSZHMqajbxDwA3nZvor6XMbrNmicA00nzU9CYxI');
+const stripe = Stripe'pk_live_51NrQsrE03aVdhmxuTZ7wSBPfidUKYpUBKkl21eX8alr6zN2qFTIfN5x8fAHlSZHMqajbxDwA3nZvor6XMbrNmicA00nzU9CYxI';
 
 // Backend endpoint for creating a Stripe Checkout Session.
 // Change this URL if the server is hosted at a different origin.
